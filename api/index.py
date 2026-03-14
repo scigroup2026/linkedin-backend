@@ -1,36 +1,59 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from linkedin_api import Linkedin
 import os
 
-app = Flask(__name__)
-# Wajib pakai CORS biar nggak diblokir pas dipanggil dari HTML kamu
-CORS(app)
+# Import library LinkedIn
+from linkedin_api import Linkedin
+from linkedin_api.client import Client
 
-@app.route('/', methods=['GET'])
-def home():
-    return jsonify({"status": "ok", "message": "Backend Vercel is running, ges!"})
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# 1. ILMU HITAM: Kita bajak fungsi 'authenticate' bawaan library LinkedIn
+# Biar dia nggak login pakai email/password, tapi langsung nyuntikkin Cookies!
+def hack_authenticate(self, username, password):
+    li_at = os.environ.get('LI_AT', '')
+    jsessionid = os.environ.get('JSESSIONID', '')
+    
+    # Masukin cookies ke sesi browser virtual
+    self.session.cookies.set("li_at", li_at, domain=".linkedin.com")
+    self.session.cookies.set("JSESSIONID", jsessionid, domain=".linkedin.com")
+    
+    # CSRF Token butuh JSESSIONID tanpa tanda kutip
+    self.session.headers["csrf-token"] = jsessionid.strip('"')
+
+# Timpa fungsi aslinya dengan fungsi bajakan kita
+Client.authenticate = hack_authenticate
+
+@app.route('/api/check', methods=['GET', 'POST', 'OPTIONS'])
+def check_linkedin():
+    if request.method == 'GET':
+        return jsonify({"status": "ok", "message": "Endpoint ini siap nerima POST data!"})
 
 @app.route('/api/check', methods=['POST'])
 def check_linkedin():
-    # Ngambil credential dari Vercel Environment Variables biar aman
     EMAIL = os.environ.get('LINKEDIN_EMAIL')
-    PASSWORD = os.environ.get('LINKEDIN_PASS')
-    PROXY_URL = os.environ.get('PROXY_URL') # Opsional, tapi highly recommended
+    LI_AT = os.environ.get('LI_AT')
+    JSESSIONID = os.environ.get('JSESSIONID')
+    PROXY_URL = os.environ.get('PROXY_URL')
     
-    if not EMAIL or not PASSWORD:
-        return jsonify({"status": "error", "message": "Oops, Email/Password belum di-set di Vercel!"})
+    if not LI_AT or not JSESSIONID:
+        return jsonify({"status": "error", "message": "Cookies LI_AT atau JSESSIONID belum disetting di Vercel!"})
 
     data = request.json
     target = data.get('target')
     
     if not target:
-        return jsonify({"status": "error", "message": "Kasih target username dulu dong."})
+        return jsonify({"status": "error", "message": "Target kosong cuy."})
 
     proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
 
     try:
-        api = Linkedin(EMAIL, PASSWORD, proxies=proxies)
+        # 2. Panggil API. Karena udah dibajak, parameter dummy ini bakal diabaikan
+        # dan sistem langsung pakai Cookies kamu.
+        api = Linkedin("dummy_email", "dummy_pass", proxies=proxies)
+        
+        # Tarik data postingan target (Mau akun profil atau Company kayak Ditekindo, harusnya tembus!)
         posts = api.get_profile_posts(target)
         
         if not posts:
@@ -44,5 +67,3 @@ def check_linkedin():
             
     except Exception as e:
         return jsonify({"status": "error", "message": f"Error scraping: {str(e)}"})
-
-# Follow this account for life and love tips
