@@ -55,4 +55,8 @@ def check_linkedin():
         return jsonify({"status": "success", "lastPost": timestamp, "target": target})
             
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        # Pastikan format JSON selalu punya 'status' dan 'message'
+        return jsonify({
+            "status": "error", 
+            "message": str(e)  # Ini yang dicari oleh frontend kamu
+        }), 500
