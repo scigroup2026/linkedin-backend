@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn Bulk Analyzer | Syntax Corp Indonesia</title>
+    <title>LinkedIn Bulk Analyzer | SCI Group</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -15,24 +15,20 @@
                 <h1 class="text-3xl font-bold flex items-center gap-3">
                     <i class="fab fa-linkedin"></i> LinkedIn Bulk Analyzer
                 </h1>
-                <p class="mt-2 opacity-90">Analisis aktivitas holding SCI Group secara otomatis via Vercel Backend.</p>
+                <p class="mt-2 opacity-90">Analisis aktivitas holding SCI Group via Vercel Backend.</p>
             </div>
-            <div class="flex flex-col items-end gap-2">
-                <div id="cloudStatus" class="text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1 bg-white/20 text-white/90 border border-white/20">
-                    <i class="fas fa-server"></i> Status: Ready
-                </div>
+            <div id="cloudStatus" class="text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1 bg-white/20 text-white/90 border border-white/20">
+                <i class="fas fa-server"></i> API: Vercel Ready
             </div>
         </div>
 
         <div class="p-6">
             <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Masukkan Username / URL Profil LinkedIn:
-                </label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Masukkan Username / URL Profil LinkedIn:</label>
                 <textarea id="inputProfiles" class="w-full border border-gray-300 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm" rows="5" placeholder="satyanadella&#10;https://www.linkedin.com/company/google/"></textarea>
                 
                 <div class="mt-3 flex justify-between items-center">
-                    <button onclick="loadDataHolding()" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg transition text-sm">
+                    <button onclick="loadDataHolding()" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg transition text-sm border border-blue-200">
                         <i class="fas fa-database"></i> Load Data Holding SCI
                     </button>
                     <span id="countIndicator" class="font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 text-sm">0 profil</span>
@@ -41,4 +37,29 @@
 
             <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8 border-b pb-6">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <div class="flex items-center gap-2 bg-blue
+                    <div class="flex items-center gap-2 bg-blue-50 p-3 rounded-xl border border-blue-100 w-full">
+                        <label class="text-sm text-blue-800 font-medium whitespace-nowrap">API:</label>
+                        <select id="apiSelector" class="border border-blue-200 rounded-lg p-2 text-sm outline-none bg-white w-full font-bold">
+                            <option value="vercel_python">Vercel Backend (Cookies)</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="btnAnalyze" onclick="mulaiAnalisis()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                    <i class="fas fa-search"></i> Mulai Analisis
+                </button>
+            </div>
+
+            <div id="progressContainer" class="hidden mb-6 bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <div class="flex justify-between text-sm mb-2 font-medium">
+                    <span id="progressText" class="text-blue-700">Memproses...</span>
+                    <span id="progressPercent" class="text-blue-700">0%</span>
+                </div>
+                <div class="w-full bg-blue-200 rounded-full h-2.5">
+                    <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <h2 class="text-xl font-bold mb-3 text-emerald-600 flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i> Aktif (Post ≤ 2 Hari)
