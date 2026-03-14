@@ -4,10 +4,6 @@
     {
       "src": "api/index.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "public/index.html",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -17,13 +13,12 @@
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Max-Age": "86400"
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
       }
     },
     {
       "src": "/(.*)",
-      "dest": "public/index.html"
+      "dest": "api/index.py"
     }
   ]
 }
