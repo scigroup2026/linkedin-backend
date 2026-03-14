@@ -5,61 +5,50 @@ from linkedin_api import Linkedin
 from linkedin_api.client import Client
 
 app = Flask(__name__)
-# Izinkan CORS untuk semua rute agar HTML lokal bisa akses
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# 1. ILMU HITAM: Override fungsi authenticate
+# Logic Override Auth LinkedIn
 def hack_authenticate(self, username, password):
     li_at = os.environ.get('LI_AT', '')
     jsessionid = os.environ.get('JSESSIONID', '')
-    
     self.session.cookies.set("li_at", li_at, domain=".linkedin.com")
     self.session.cookies.set("JSESSIONID", jsessionid, domain=".linkedin.com")
     self.session.headers["csrf-token"] = jsessionid.strip('"')
 
 Client.authenticate = hack_authenticate
 
-# 2. ROUTE TUNGGAL (Digabung agar tidak bentrok)
-@app.route('/api/check', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/api/check', methods=['POST', 'OPTIONS'])
 def check_linkedin():
-    # Jika browser cuma ngetes lewat link (GET)
-    if request.method == 'GET':
-        return jsonify({"status": "ok", "message": "Backend Cookies SIAP!"})
+    if request.method == 'OPTIONS':
+        return jsonify({"status": "ok"}), 200
 
-    # Jika dipanggil dari kodingan HTML (POST)
     LI_AT = os.environ.get('LI_AT')
     JSESSIONID = os.environ.get('JSESSIONID')
-    PROXY_URL = os.environ.get('PROXY_URL')
     
     if not LI_AT or not JSESSIONID:
-        return jsonify({"status": "error", "message": "Cookies belum diset di Environment Vercel!"})
+        return jsonify({"status": "error", "message": "Backend: Env Cookies Not Set"}), 500
 
     data = request.json
-    if not data:
-        return jsonify({"status": "error", "message": "Payload JSON tidak ditemukan."})
-        
-    target = data.get('target')
+    target = data.get('target') if data else None
+    
     if not target:
-        return jsonify({"status": "error", "message": "Target username kosong."})
-
-    proxies = {"http": PROXY_URL, "https": PROXY_URL} if PROXY_URL else None
+        return jsonify({"status": "error", "message": "Target empty"}), 400
 
     try:
-        api = Linkedin("dummy", "dummy", proxies=proxies)
-        posts = api.get_profile_posts(target)
+        api = Linkedin("", "") # Email/Pass dummy karena pakai cookies
+        posts = api.get_profile_posts(public_id=target, count=1)
         
-        if not posts:
-            return jsonify({"status": "success", "lastPost": None})
+        last_post = posts[0].get('createdAt') if posts and len(posts) > 0 else None
         
-        if 'createdAt' in posts[0]:
-            return jsonify({"status": "success", "lastPost": posts[0]['createdAt']})
-        
-        return jsonify({"status": "error", "message": "Timestamp tidak ditemukan."})
+        return jsonify({
+            "status": "success",
+            "lastPost": last_post,
+            "target": target
+        })
             
     except Exception as e:
-        return jsonify({"status": "error", "message": f"Scraping error: {str(e)}"})
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-# Tambahan route root agar tidak muncul 404 di halaman utama vercel
-@app.route('/')
-def home():
-    return jsonify({"status": "ok", "message": "Vercel Python is Live!"})
+@app.route('/api/health')
+def health():
+    return jsonify({"status": "online"})

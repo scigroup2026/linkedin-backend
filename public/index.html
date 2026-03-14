@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Bulk Analyzer | Syntax Corp Indonesia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800 p-4 md:p-8 relative">
+
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold flex items-center gap-3">
+                    <i class="fab fa-linkedin"></i> LinkedIn Bulk Analyzer
+                </h1>
+                <p class="mt-2 opacity-90">Analisis aktivitas holding SCI Group secara otomatis via Vercel Backend.</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+                <div id="cloudStatus" class="text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1 bg-white/20 text-white/90 border border-white/20">
+                    <i class="fas fa-server"></i> Status: Ready
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Masukkan Username / URL Profil LinkedIn:
+                </label>
+                <textarea id="inputProfiles" class="w-full border border-gray-300 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm" rows="5" placeholder="satyanadella&#10;https://www.linkedin.com/company/google/"></textarea>
+                
+                <div class="mt-3 flex justify-between items-center">
+                    <button onclick="loadDataHolding()" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg transition text-sm">
+                        <i class="fas fa-database"></i> Load Data Holding SCI
+                    </button>
+                    <span id="countIndicator" class="font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 text-sm">0 profil</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-between mb-8 border-b pb-6">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="flex items-center gap-2 bg-blue
